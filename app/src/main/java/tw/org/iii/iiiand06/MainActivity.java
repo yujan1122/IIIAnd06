@@ -10,8 +10,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.SimpleTimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
     private Timer timer;
     private int i;
     private UIHandler uiHandler;
+
+    private SimpleAdapter adapter;
+    private LinkedList <HashMap<String,String>> data;
+    private String[] from = {"lapItem"};
+    private int[] to = {R.id.lapItem};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +51,17 @@ public class MainActivity extends AppCompatActivity {
 
         uiHandler = new UIHandler();
         timer = new Timer();
+        initListView();
+    }
+
+    private void initListView(){
+        data = new LinkedList<>();
+        adapter = new SimpleAdapter(
+                this, data, R.layout.item, from, to);
+        lapList.setAdapter(adapter);
     }
 
     //良善工程師,避免
-
     @Override
     public void finish() {
         if(timer != null){
@@ -68,10 +84,17 @@ public class MainActivity extends AppCompatActivity {
         //週期任務 java api
     }
     private void doLap(){
-
+        HashMap<String,String> itemData = new HashMap<>();
+        itemData.put(from[0], clock.getText().toString());
+        data.add(0,itemData); //每記錄一個lap, 指定優先放第0位置
+        adapter.notifyDataSetChanged();
     }
     private void doReset(){
         i = 0;
+        data.clear(); //
+        //data = new LinkedList<>(); //用ref去認data,與上列clear不同效果
+        adapter.notifyDataSetChanged();
+
         uiHandler.sendEmptyMessage(0);
     }
 
